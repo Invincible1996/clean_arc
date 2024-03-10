@@ -1,14 +1,17 @@
 import 'dart:io';
 
 import 'package:clean_arc/extension/string_extension.dart';
+import 'package:dio/dio.dart';
 
-void cleanArc(List<String> arguments) {
-  print('Clean Architecture');
-
-  // 获取命令行参数
-  print(arguments);
-
-  final featureName = arguments[0];
+void cleanArc(String featureName) {
+  // // 获取命令行参数
+  // if (arguments.isEmpty) {
+  //   // error print
+  //   print('⚠️ Please enter the feature name. ⚠️');
+  //   exit(0);
+  // }
+  //
+  // final featureName = arguments[0];
 
   print('featureName: $featureName');
 
@@ -42,6 +45,12 @@ void cleanArc(List<String> arguments) {
   Directory('$featuresFolder/presentation/widgets').createSync();
   Directory('$featuresFolder/presentation/providers').createSync();
 
+  /// presentation/providers目录下创建文件夹state and notifier
+  Directory('$featuresFolder/presentation/providers/state').createSync();
+  Directory('$featuresFolder/presentation/providers/notifier').createSync();
+
+  print('🎉 $featureName feature folder created successfully. 🎉');
+
   /// datasource目录下创建一个文件名为featureName_datasource.dart的文件
   final datasourceFile =
       File('$featuresFolder/data/datasource/${featureName}_datasource.dart');
@@ -64,13 +73,14 @@ void cleanArc(List<String> arguments) {
   }
   ''');
 
-  /// repositories目录下创建一个文件名为featureName_repository.dart的文件
-  final repositoryFile =
-      File('$featuresFolder/data/repositories/${featureName}_repository.dart');
+  /// repositories目录下创建一个文件名为featureName_repository_impl.dart的文件
+  final repositoryFile = File(
+      '$featuresFolder/data/repositories/${featureName}_repository_impl.dart');
   repositoryFile.createSync();
   repositoryFile.writeAsStringSync('''
-  /// This is ${featureName.toClassName}Repository
-  class ${featureName.toClassName}Repository {
+  import '../../domain/repositories/${featureName}_repository.dart';
+  /// This is ${featureName.toClassName}RepositoryImpl
+  class ${featureName.toClassName}RepositoryImpl implements ${featureName.toClassName}Repository {
     // Add your methods here
   }
   ''');
@@ -89,7 +99,10 @@ void cleanArc(List<String> arguments) {
       '$featuresFolder/domain/repositories/${featureName}_repository.dart');
   repositoryFile2.createSync();
   repositoryFile2.writeAsStringSync('''
-  class ${featureName.toClassName}Repository {
+  /// author : kevin
+  /// date : 2021/8/19 10:00
+  /// This is ${featureName.toClassName}Repository
+ abstract class ${featureName.toClassName}Repository {
     // Add your methods here
   }
   ''');
@@ -109,9 +122,31 @@ void cleanArc(List<String> arguments) {
       File('$featuresFolder/presentation/screens/${featureName}_screen.dart');
   screenFile.createSync();
   screenFile.writeAsStringSync('''
-  class ${featureName.toClassName}Screen {
-    // Add your methods here
+  /// author : kevin
+  ///  date : 2021/8/19 10:00
+  ///  description : ${featureName.toClassName}Screen
+  
+  import 'package:flutter/material.dart';
+  import 'package:flutter_riverpod/flutter_riverpod.dart';
+ class  ${featureName.toClassName} extends ConsumerWidget {
+  const  ${featureName.toClassName}({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Test User'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+          },
+          child: const Text('Fetch Test User'),
+        ),
+      ),
+    );
   }
+}
   ''');
 
   /// providers目录下创建一个文件名为featureName_state_provider.dart的文件
@@ -121,4 +156,94 @@ void cleanArc(List<String> arguments) {
   stateProviderFile.writeAsStringSync('''
   /// This is ${featureName.toClassName}StateProvider 
   ''');
+
+  /// providers/state目录下创建一个文件名为featureName_state.dart的文件
+  final stateFile = File(
+      '$featuresFolder/presentation/providers/state/${featureName}_state.dart');
+  stateFile.createSync();
+  stateFile.writeAsStringSync('''
+  /// This is ${featureName.toClassName}State 
+  class ${featureName.toClassName}State {
+    // Add your variables here
+  }
+  ''');
+}
+
+/// 解析swagger生成的json文件 获取属性 使用dio请求接口
+void parseJson() async {
+  // dio 请求接口
+  final res = await Dio().get('http://47.97.6.227:8081/v2/api-docs');
+
+  // print(res.data);
+
+  /// 获取所有的path
+  final paths = res.data['paths'];
+
+  /// 创建api_url 文件 用于存放所有的api接口
+  final apiFile = File('api_url.dart');
+  apiFile.createSync();
+  apiFile.writeAsStringSync('''
+  /// author : kevin
+  /// date : 2021/8/19 10:00
+  /// description : api url
+  class ApiUrl {
+    // Add your api url here
+    ${generateApiUrl(paths)}
+  }
+  ''');
+
+  ///生成service文件 用于存放所有的api接口
+  // final serviceFile = File('service.dart');
+  // serviceFile.createSync();
+  // serviceFile.writeAsStringSync('''
+  // /// author : kevin
+  // /// date : 2021/8/19 10:00
+  // /// description : service
+  // class Service {
+  //   // Add your service here
+  //   ${generateServiceFunc(paths)}
+  // }
+  // ''');
+
+  // 格式化生成的文件
+  Process.run('flutter', ['format', 'api_url.dart']);
+}
+
+generateServiceFunc(Map<String, dynamic> paths) {
+  StringBuffer result = StringBuffer();
+  paths.forEach((key, value) {
+    result.write('''
+    /// path: $key
+    static Future<void> ${key.toMethodName}() async {
+      // Add your service here
+    }
+    ''');
+  });
+  return result.toString();
+}
+
+/// 生成api url
+String generateApiUrl(Map<String, dynamic> paths) {
+  StringBuffer result = StringBuffer();
+  paths.forEach((key, value) {
+    result.write('''
+    /// description: ${generateDescription(value)}
+    static const String ${key.toMethodName} = "$key";\n
+    ''');
+  });
+  return result.toString();
+}
+
+String generateDescription(value) {
+  // get 请求
+  if (value['get'] != null) {
+    return value['get']['summary'];
+  }
+
+  // post 请求
+  if (value['post'] != null) {
+    return value['post']['summary'];
+  }
+
+  return '';
 }
