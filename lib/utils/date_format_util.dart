@@ -16,4 +16,9 @@ class DateFormatUtil {
   static String formatTime(DateTime dateTime) {
     return '${dateTime.hour}:${dateTime.minute}:${dateTime.second}';
   }
+
+  /// milliseconds to date String eg: 1615276800000 to 2024-03-09
+  static String formatMillisecondsToDate(int milliseconds) {
+    return formatDate(DateTime.fromMillisecondsSinceEpoch(milliseconds));
+  }
 }
