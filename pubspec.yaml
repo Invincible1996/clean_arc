@@ -10,6 +10,7 @@ environment:
 dependencies:
   args: ^2.4.2
   dio: any
+  intl: ^0.19.0
   # path: ^1.8.0
 
 dev_dependencies:
