@@ -1,4 +1,4 @@
-flutter clean architecture folder structure generator
+flutter clean architecture folder structure generator cli
 
 ## Installation
 

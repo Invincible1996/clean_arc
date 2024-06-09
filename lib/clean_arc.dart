@@ -53,7 +53,8 @@ void cleanArc(String featureName) {
   print('🎉 $featureName feature folder created successfully. 🎉');
 
   /// datasource目录下创建一个文件名为featureName_datasource.dart的文件
-  final datasourceFile = File('$featuresFolder/data/datasource/${featureName}_datasource.dart');
+  final datasourceFile =
+      File('$featuresFolder/data/datasource/${featureName}_datasource.dart');
   datasourceFile.createSync();
   datasourceFile.writeAsStringSync('''
   /// author : kevin
@@ -65,7 +66,8 @@ void cleanArc(String featureName) {
   ''');
 
   /// models目录下创建一个文件名为featureName_model.dart的文件
-  final modelFile = File('$featuresFolder/data/models/${featureName}_model.dart');
+  final modelFile =
+      File('$featuresFolder/data/models/${featureName}_model.dart');
   modelFile.createSync();
   modelFile.writeAsStringSync('''
   /// This is ${featureName.toClassName}Model 
@@ -75,7 +77,8 @@ void cleanArc(String featureName) {
   ''');
 
   /// repositories目录下创建一个文件名为featureName_repository_impl.dart的文件
-  final repositoryFile = File('$featuresFolder/data/repositories/${featureName}_repository_impl.dart');
+  final repositoryFile = File(
+      '$featuresFolder/data/repositories/${featureName}_repository_impl.dart');
   repositoryFile.createSync();
   repositoryFile.writeAsStringSync('''
   import '../../domain/repositories/${featureName}_repository.dart';
@@ -87,7 +90,8 @@ void cleanArc(String featureName) {
   ''');
 
   /// providers目录下创建一个文件名为featureName_provider.dart的文件
-  final providerFile = File('$featuresFolder/domain/providers/${featureName}_provider.dart');
+  final providerFile =
+      File('$featuresFolder/domain/providers/${featureName}_provider.dart');
   providerFile.createSync();
   providerFile.writeAsStringSync('''
   /// This is ${featureName.toClassName}Provider
@@ -95,7 +99,8 @@ void cleanArc(String featureName) {
   ''');
 
   /// repositories目录下创建一个文件名为featureName_repository.dart的文件
-  final repositoryFile2 = File('$featuresFolder/domain/repositories/${featureName}_repository.dart');
+  final repositoryFile2 = File(
+      '$featuresFolder/domain/repositories/${featureName}_repository.dart');
   repositoryFile2.createSync();
   repositoryFile2.writeAsStringSync('''
   /// author : kevin
@@ -107,7 +112,8 @@ void cleanArc(String featureName) {
   ''');
 
   /// entities目录下创建一个文件名为featureName_entity.dart的文件
-  final entityFile = File('$featuresFolder/domain/entities/${featureName}_entity.dart');
+  final entityFile =
+      File('$featuresFolder/domain/entities/${featureName}_entity.dart');
   entityFile.createSync();
   entityFile.writeAsStringSync('''
   /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
@@ -118,7 +124,8 @@ void cleanArc(String featureName) {
   ''');
 
   /// screen目录下创建一个文件名为featureName_screen.dart的文件
-  final screenFile = File('$featuresFolder/presentation/screens/${featureName}_screen.dart');
+  final screenFile =
+      File('$featuresFolder/presentation/screens/${featureName}_screen.dart');
   screenFile.createSync();
   screenFile.writeAsStringSync('''
   /// author : kevin
@@ -127,8 +134,8 @@ void cleanArc(String featureName) {
   
   import 'package:flutter/material.dart';
   import 'package:flutter_riverpod/flutter_riverpod.dart';
- class  ${featureName.toClassName} extends ConsumerWidget {
-  const  ${featureName.toClassName}({super.key});
+ class  ${featureName.toClassName}Screen extends ConsumerWidget {
+  const  ${featureName.toClassName}Screen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -149,14 +156,16 @@ void cleanArc(String featureName) {
   ''');
 
   /// providers目录下创建一个文件名为featureName_state_provider.dart的文件
-  final stateProviderFile = File('$featuresFolder/presentation/providers/${featureName}_state_provider.dart');
+  final stateProviderFile = File(
+      '$featuresFolder/presentation/providers/${featureName}_state_provider.dart');
   stateProviderFile.createSync();
   stateProviderFile.writeAsStringSync('''
   /// This is ${featureName.toClassName}StateProvider 
   ''');
 
   /// providers/state目录下创建一个文件名为featureName_state.dart的文件
-  final stateFile = File('$featuresFolder/presentation/providers/state/${featureName}_state.dart');
+  final stateFile = File(
+      '$featuresFolder/presentation/providers/state/${featureName}_state.dart');
   stateFile.createSync();
   stateFile.writeAsStringSync('''
   /// author : kevin
