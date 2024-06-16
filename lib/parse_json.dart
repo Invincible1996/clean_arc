@@ -10,13 +10,19 @@ void parseJson(String url) async {
   // 'http://47.97.6.227:8081/v2/api-docs'
   final res = await Dio().get(url);
 
-  print(res.data);
+  // print(res.data);
 
   /// 获取所有的path
   final paths = res.data['paths'];
 
+  String currentDir = Directory.current.path;
+
+  print(currentDir);
+
+  createFolderIfNotExists('$currentDir/lib/src/api_service');
+
   /// 创建api_url 文件 用于存放所有的api接口
-  final apiFile = File('api_url.dart');
+  final apiFile = File('$currentDir/lib/src/api_service/api_url.dart');
   apiFile.createSync();
   apiFile.writeAsStringSync('''
   /// author : kevin
@@ -29,7 +35,7 @@ void parseJson(String url) async {
   ''');
 
   ///生成service文件 用于存放所有的api接口
-  final serviceFile = File('service.dart');
+  final serviceFile = File('$currentDir/lib/src/api_service/service.dart');
   serviceFile.createSync();
   serviceFile.writeAsStringSync('''
   /// author : kevin
@@ -43,6 +49,19 @@ void parseJson(String url) async {
 
   // 格式化生成的文件
   Process.run('flutter', ['format', 'api_url.dart']);
+}
+
+void createFolderIfNotExists(String path) {
+  final directory = Directory(path);
+
+  // 检查文件夹是否存在
+  if (!directory.existsSync()) {
+    // 如果文件夹不存在，则创建它
+    directory.createSync(recursive: true);
+    print('文件夹已创建：$path');
+  } else {
+    print('文件夹已存在：$path');
+  }
 }
 
 generateServiceFunc(Map<String, dynamic> paths) {

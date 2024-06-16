@@ -1,5 +1,5 @@
   /// author : kevin
-  /// date : 2024-6-16 21:59:16
+  /// date : 2024-6-16 23:9:34
   /// description : api url
   class ApiUrl {
     // Add your api url here
