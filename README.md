@@ -17,5 +17,5 @@ export PATH="$PATH":"$HOME/.pub-cache/bin"
 ## Usage
 
 ```shell
-clean_arc feature:test_user
+clean_arc --feature test_user
 ```

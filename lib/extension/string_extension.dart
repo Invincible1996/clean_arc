@@ -25,4 +25,10 @@ extension StringExtension on String {
     }
     return list.join();
   }
+
+  // get url from arguments
+// eg:api:http://47.97.6.227:8081/v2/api-docs to http://
+  String get toUrl {
+    return split(':')[1].split('/').first;
+  }
 }

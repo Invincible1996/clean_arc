@@ -1,6 +1,3 @@
-/// author kevin
-/// date 3/11/24 10:47
-
 class DateFormatUtil {
   /// format DateTime to String eg: 2024-03-09 10:00:00
   static String formatDateTime(DateTime dateTime) {
