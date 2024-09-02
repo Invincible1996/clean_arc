@@ -31,10 +31,26 @@ void main(List<String> arguments) {
     ''');
     exit(0);
   }
+  // 创建基本的项目结构 --framework
+  if (arguments[0].contains('framework')) {
+    print('current command is create framework folder');
+    clean_arc.cleanArc('framework');
+  }
 
   // feature:user 创建目录
   if (arguments[0].contains('feature')) {
     print('current command is create feature folder');
+    // 当前目录下需要有android、ios、macos、web、windows、linux文件夹中的一个
+    if (!Directory('android').existsSync() &&
+        !Directory('ios').existsSync() &&
+        !Directory('macos').existsSync() &&
+        !Directory('web').existsSync() &&
+        !Directory('windows').existsSync() &&
+        !Directory('linux').existsSync()) {
+      print(
+          '⚠️ Please run this command in the root folder of a flutter project. ⚠️');
+      exit(0);
+    }
     final featureName = arguments[1];
     if (featureName.isEmpty) {
       print('⚠️ Please enter the feature name. ⚠️');

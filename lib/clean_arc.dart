@@ -4,6 +4,132 @@ import 'package:clean_arc/extension/string_extension.dart';
 import 'package:clean_arc/utils/date_format_util.dart';
 
 void cleanArc(String featureName) {
+  // framework
+  if (featureName == 'framework') {
+    print(
+        'current command is create framework directory for clean architecture');
+    // 创建基本的项目结构
+    // lib/
+    // |-- core/
+    // |   |-- models/
+    // |   |-- constants/
+    // |   |   |-- api_constants.dart
+    // |   |   |-- app_constants.dart
+    // |   |-- themes/
+    // |   |   |-- app_theme.dart
+    // |   |-- utils/
+    // |   |   |-- helpers.dart
+    // |   |-- services/
+    // |   |   |-- api_service.dart
+    // |   |   |-- storage_service.dart
+    // |-- routes/
+    // |   |-- app_router.dart
+    // |   |-- app_router.gr.dart
+    // |
+    // |-- main.dart
+
+    // 在当前目录下的 "lib/src" 路径中创建新文件夹
+    String srcFolder = 'lib/src';
+    Directory(srcFolder).createSync(recursive: true);
+
+    // 1. 创建core文件夹
+    Directory('$srcFolder/core').createSync();
+
+    // 1.0 创建models文件夹
+    Directory('$srcFolder/core/models').createSync();
+
+    // 1.1 创建constants文件夹
+    Directory('$srcFolder/core/constants').createSync();
+    // 1.1.1 创建api_constants.dart
+    final apiConstantsFile =
+        File('$srcFolder/core/constants/api_constants.dart');
+    apiConstantsFile.createSync();
+    apiConstantsFile.writeAsStringSync('''
+    /// author : kevin
+    /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
+    /// This is ApiConstants
+    abstract class ApiConstants {
+    // Add your variables here
+  }
+  ''');
+    // 1.1.2 创建app_constants.dart
+    final appConstantsFile =
+        File('$srcFolder/core/constants/app_constants.dart');
+    appConstantsFile.createSync();
+    appConstantsFile.writeAsStringSync('''
+    /// author : kevin
+    /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
+    /// This is AppConstants
+    abstract class AppConstants {
+    // Add your variables here
+  }
+  ''');
+    // 1.2 创建themes文件夹
+    Directory('$srcFolder/core/themes').createSync();
+    // 1.2.1 创建app_theme.dart
+    final appThemeFile = File('$srcFolder/core/themes/app_theme.dart');
+    appThemeFile.createSync();
+    appThemeFile.writeAsStringSync('''
+    /// author : 
+    /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
+    /// This is AppTheme
+    abstract class AppTheme {
+    // Add your variables here
+  }
+  ''');
+    // 1.3 创建utils文件夹
+    Directory('$srcFolder/core/utils').createSync();
+    // 1.3.1 创建helpers.dart
+    final helpersFile = File('$srcFolder/core/utils/helpers.dart');
+    helpersFile.createSync();
+    helpersFile.writeAsStringSync('''
+    abstract class Helpers {
+    // Add your methods here
+  }
+  ''');
+
+    // 1.4 创建services文件夹
+    Directory('$srcFolder/core/services').createSync();
+    // 1.4.1 创建api_service.dart
+    final apiServiceFile = File('$srcFolder/core/services/api_service.dart');
+    apiServiceFile.createSync();
+    apiServiceFile.writeAsStringSync('''
+    abstract class ApiService {
+    // Add your methods here
+  }
+  ''');
+    // 1.4.2 创建storage_service.dart
+    final storageServiceFile =
+        File('$srcFolder/core/services/storage_service.dart');
+
+    storageServiceFile.createSync();
+    storageServiceFile.writeAsStringSync('''
+    abstract class StorageService {
+    // Add your methods here
+  }
+  ''');
+    // 2. 创建routes文件夹
+    Directory('$srcFolder/routes').createSync();
+    // 2.1 创建app_router.dart
+    final appRouterFile = File('$srcFolder/routes/app_router.dart');
+    appRouterFile.createSync();
+    appRouterFile.writeAsStringSync('''
+    abstract class AppRouter {
+    // Add your methods here
+  }
+  ''');
+    // 2.2 创建app_router.dart
+    final appRouterGrFile = File('$srcFolder/routes/app_router.dart');
+    appRouterGrFile.createSync();
+    appRouterGrFile.writeAsStringSync('''
+    abstract class AppRouterGr {
+    // Add your methods here
+  }
+  ''');
+
+    return;
+  }
+
   // // 获取命令行参数
   // if (arguments.isEmpty) {
   //   // error print
