@@ -1,7 +1,7 @@
 name: clean_arc
 description: A sample command-line application.
 version: 1.0.0
-# repository: https://github.com/my_org/my_repo
+repository: 'https://github.com/Invincible1996/clean_arc.git'
 
 environment:
   sdk: ^3.3.1
