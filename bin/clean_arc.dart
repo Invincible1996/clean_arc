@@ -1,9 +1,25 @@
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:clean_arc/clean_arc.dart' as clean_arc;
 import 'package:clean_arc/parse_json.dart';
 
 void main(List<String> arguments) {
+  var parser = ArgParser();
+  parser.addOption('mode');
+  parser.addFlag('verbose', defaultsTo: true);
+  var results = parser.parse(['--mode', 'debug', 'something', 'else']);
+
+  print(results.options); // debug
+  print(results.rest); // true
+
+  // check if the root folder is flutter project containing pubspec.yaml
+  if (!File('pubspec.yaml').existsSync()) {
+    print(
+        '⚠️ Please run this command in the root folder of a flutter project. ⚠️');
+    exit(0);
+  }
+
   if (arguments.isEmpty) {
     // show help
     print('''
