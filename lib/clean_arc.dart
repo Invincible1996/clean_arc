@@ -45,9 +45,7 @@ void cleanArc(String featureName) {
         File('$srcFolder/core/constants/api_constants.dart');
     apiConstantsFile.createSync();
     apiConstantsFile.writeAsStringSync('''
-    /// author : kevin
-    /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
-    /// This is ApiConstants
+
     abstract class ApiConstants {
     // Add your variables here
   }
@@ -207,8 +205,7 @@ void cleanArc(String featureName) {
   repositoryFile.createSync();
   repositoryFile.writeAsStringSync('''
   import '../../domain/repositories/${featureName}_repository.dart';
-  /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
-  /// This is ${featureName.toClassName}RepositoryImpl
+
   class ${featureName.toClassName}RepositoryImpl implements ${featureName.toClassName}Repository {
     // Add your methods here
   }
@@ -228,9 +225,7 @@ void cleanArc(String featureName) {
       '$featuresFolder/domain/repositories/${featureName}_repository.dart');
   repositoryFile2.createSync();
   repositoryFile2.writeAsStringSync('''
-  /// author : kevin
-  /// date :  ${DateFormatUtil.formatDateTime(DateTime.now())}
-  /// This is ${featureName.toClassName}Repository
+
  abstract class ${featureName.toClassName}Repository {
     // Add your methods here
   }
@@ -241,8 +236,6 @@ void cleanArc(String featureName) {
       File('$featuresFolder/domain/entities/${featureName}_entity.dart');
   entityFile.createSync();
   entityFile.writeAsStringSync('''
-  /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
-  /// This is ${featureName.toClassName}Entity
   class ${featureName.toClassName}Entity {
     // Add your methods here
   }
@@ -253,10 +246,6 @@ void cleanArc(String featureName) {
       File('$featuresFolder/presentation/screens/${featureName}_screen.dart');
   screenFile.createSync();
   screenFile.writeAsStringSync('''
-  /// author : kevin
-  ///  date : ${DateFormatUtil.formatDateTime(DateTime.now())}
-  ///  description : ${featureName.toClassName}Screen
-  
   import 'package:flutter/material.dart';
   import 'package:flutter_riverpod/flutter_riverpod.dart';
  class ${featureName.toClassName}Screen extends ConsumerWidget {
@@ -266,14 +255,10 @@ void cleanArc(String featureName) {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test User'),
+        title: const Text('${featureName.toClassName}'),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-          },
-          child: const Text('Fetch Test User'),
-        ),
+        child: Text('${featureName.toClassName} Screen')
       ),
     );
   }
@@ -285,7 +270,7 @@ void cleanArc(String featureName) {
       '$featuresFolder/presentation/providers/${featureName}_state_provider.dart');
   stateProviderFile.createSync();
   stateProviderFile.writeAsStringSync('''
-  /// This is ${featureName.toClassName}StateProvider 
+  /// This is ${featureName.toClassName}StateProvider
   ''');
 
   /// providers/state目录下创建一个文件名为featureName_state.dart的文件
@@ -293,9 +278,6 @@ void cleanArc(String featureName) {
       '$featuresFolder/presentation/providers/state/${featureName}_state.dart');
   stateFile.createSync();
   stateFile.writeAsStringSync('''
-  /// author : kevin
-  /// date : ${DateFormatUtil.formatDateTime(DateTime.now())}
-  /// This is ${featureName.toClassName}State 
   class ${featureName.toClassName}State {
     // Add your variables here
   }

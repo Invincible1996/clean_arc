@@ -16,7 +16,13 @@ extension StringExtension on String {
 
   /// first letter is lowercase, eg: /note/add to noteAdd
   String get toMethodName {
-    final list = split('/');
+    // 使用正则表达式按斜杠和短横线切割字符串
+    List<String> list = split(RegExp(r'[/\-]'));
+
+    // 输出结果
+    // print(words);
+    // 可能包含多个/ 和 -
+    // final list = split('/');
     // 去除list中所有的空字符串
     list.removeWhere((element) => element.isEmpty);
     // list中第二、三个元素首字母大写
