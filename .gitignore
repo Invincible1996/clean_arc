@@ -3,3 +3,6 @@
 .dart_tool/
 example/
 src/
+
+# Swagger API definition
+lib/swagger.json
