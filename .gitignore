@@ -6,3 +6,6 @@ src/
 
 # Swagger API definition
 lib/swagger.json
+
+# Generated files
+struct.dart
