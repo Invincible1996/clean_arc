@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:clean_arc/extension/string_extension.dart';
+import 'package:clean_arc/src/enums/state_management.dart';
 import 'package:clean_arc/utils/date_format_util.dart';
 
-void cleanArc(String featureName) {
+void cleanArc(String featureName, {StateManagement stateManagement = StateManagement.riverpod}) {
   // framework
   if (featureName == 'framework') {
-    print(
-        'current command is create framework directory for clean architecture');
+    print('current command is create framework directory for clean architecture');
     // 创建基本的项目结构
     // lib/
     // |-- core/
@@ -128,15 +128,6 @@ void cleanArc(String featureName) {
     return;
   }
 
-  // // 获取命令行参数
-  // if (arguments.isEmpty) {
-  //   // error print
-  //   print('⚠️ Please enter the feature name. ⚠️');
-  //   exit(0);
-  // }
-  //
-  // final featureName = arguments[0];
-
   print('featureName: $featureName');
 
   /// 在src目录下的features目录下创建文件夹 名称为featureName 代码如下
@@ -169,9 +160,18 @@ void cleanArc(String featureName) {
   Directory('$featuresFolder/presentation/widgets').createSync();
   Directory('$featuresFolder/presentation/providers').createSync();
 
-  /// presentation/providers目录下创建文件夹state and notifier
-  Directory('$featuresFolder/presentation/providers/state').createSync();
-  Directory('$featuresFolder/presentation/providers/notifier').createSync();
+  /// 根据状态管理框架创建不同的目录结构
+  switch (stateManagement) {
+    case StateManagement.riverpod:
+      /// presentation/providers目录下创建文件夹state and notifier
+      Directory('$featuresFolder/presentation/providers/state').createSync();
+      Directory('$featuresFolder/presentation/providers/notifier').createSync();
+      break;
+    case StateManagement.bloc:
+      /// presentation/bloc目录下创建文件夹
+      Directory('$featuresFolder/presentation/bloc').createSync();
+      break;
+  }
 
   print('🎉 $featureName feature folder created successfully. 🎉');
 
@@ -245,41 +245,154 @@ void cleanArc(String featureName) {
   final screenFile =
       File('$featuresFolder/presentation/screens/${featureName}_screen.dart');
   screenFile.createSync();
-  screenFile.writeAsStringSync('''
+
+  switch (stateManagement) {
+    case StateManagement.riverpod:
+      screenFile.writeAsStringSync('''
   import 'package:flutter/material.dart';
   import 'package:flutter_riverpod/flutter_riverpod.dart';
- class ${featureName.toClassName}Screen extends ConsumerWidget {
-  const ${featureName.toClassName}Screen({super.key});
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('${featureName.toClassName}'),
-      ),
-      body: Center(
-        child: Text('${featureName.toClassName} Screen')
-      ),
-    );
-  }
-}
-  ''');
+  class ${featureName.toClassName}Screen extends ConsumerWidget {
+    const ${featureName.toClassName}Screen({super.key});
 
-  /// providers目录下创建一个文件名为featureName_state_provider.dart的文件
-  final stateProviderFile = File(
-      '$featuresFolder/presentation/providers/${featureName}_state_provider.dart');
-  stateProviderFile.createSync();
-  stateProviderFile.writeAsStringSync('''
-  /// This is ${featureName.toClassName}StateProvider
-  ''');
-
-  /// providers/state目录下创建一个文件名为featureName_state.dart的文件
-  final stateFile = File(
-      '$featuresFolder/presentation/providers/state/${featureName}_state.dart');
-  stateFile.createSync();
-  stateFile.writeAsStringSync('''
-  class ${featureName.toClassName}State {
-    // Add your variables here
+    @override
+    Widget build(BuildContext context, WidgetRef ref) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('${featureName.toClassName}'),
+        ),
+        body: Center(
+          child: Text('${featureName.toClassName} Screen')
+        ),
+      );
+    }
   }
   ''');
+      break;
+    case StateManagement.bloc:
+      screenFile.writeAsStringSync('''
+  import 'package:flutter/material.dart';
+  import 'package:flutter_bloc/flutter_bloc.dart';
+  import '../bloc/${featureName}_bloc.dart';
+
+  class ${featureName.toClassName}Screen extends StatelessWidget {
+    const ${featureName.toClassName}Screen({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+      return BlocProvider(
+        create: (context) => ${featureName.toClassName}Bloc(),
+        child: BlocBuilder<${featureName.toClassName}Bloc, ${featureName.toClassName}State>(
+          builder: (context, state) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('${featureName.toClassName}'),
+              ),
+              body: Center(
+                child: Text('${featureName.toClassName} Screen')
+              ),
+            );
+          },
+        ),
+      );
+    }
+  }
+  ''');
+      break;
+  }
+
+  /// 根据状态管理框架生成不同的状态管理文件
+  switch (stateManagement) {
+    case StateManagement.riverpod:
+      /// providers/state目录下创建一个文件名为featureName_state.dart的文件
+      final stateFile = File(
+          '$featuresFolder/presentation/providers/state/${featureName}_state.dart');
+      stateFile.createSync();
+      stateFile.writeAsStringSync('''
+  import 'package:freezed_annotation/freezed_annotation.dart';
+
+  part '${featureName}_state.freezed.dart';
+
+  @freezed
+  class ${featureName.toClassName}State with _\$${featureName.toClassName}State {
+    const factory ${featureName.toClassName}State({
+      @Default(false) bool isLoading,
+      String? error,
+    }) = _${featureName.toClassName}State;
+  }
+  ''');
+
+      /// providers/notifier目录下创建一个文件名为featureName_notifier.dart的文件
+      final notifierFile = File(
+          '$featuresFolder/presentation/providers/notifier/${featureName}_notifier.dart');
+      notifierFile.createSync();
+      notifierFile.writeAsStringSync('''
+  import 'package:flutter_riverpod/flutter_riverpod.dart';
+  import '../state/${featureName}_state.dart';
+
+  final ${featureName}Provider = StateNotifierProvider<${featureName.toClassName}Notifier, ${featureName.toClassName}State>(
+    (ref) => ${featureName.toClassName}Notifier(),
+  );
+
+  class ${featureName.toClassName}Notifier extends StateNotifier<${featureName.toClassName}State> {
+    ${featureName.toClassName}Notifier() : super(const ${featureName.toClassName}State());
+
+    // Add your methods here
+  }
+  ''');
+      break;
+    case StateManagement.bloc:
+      /// bloc目录下创建bloc、event和state文件
+      final blocFile =
+          File('$featuresFolder/presentation/bloc/${featureName}_bloc.dart');
+      blocFile.createSync();
+      blocFile.writeAsStringSync('''
+  import 'package:flutter_bloc/flutter_bloc.dart';
+  import 'package:freezed_annotation/freezed_annotation.dart';
+
+  part '${featureName}_event.dart';
+  part '${featureName}_state.dart';
+  part '${featureName}_bloc.freezed.dart';
+
+  class ${featureName.toClassName}Bloc extends Bloc<${featureName.toClassName}Event, ${featureName.toClassName}State> {
+    ${featureName.toClassName}Bloc() : super(const ${featureName.toClassName}State()) {
+      on<${featureName.toClassName}Event>((event, emit) {
+        event.map(
+          started: (event) async {
+            // Add your logic here
+          },
+        );
+      });
+    }
+  }
+  ''');
+
+      final eventFile =
+          File('$featuresFolder/presentation/bloc/${featureName}_event.dart');
+      eventFile.createSync();
+      eventFile.writeAsStringSync('''
+  part of '${featureName}_bloc.dart';
+
+  @freezed
+  class ${featureName.toClassName}Event with _\$${featureName.toClassName}Event {
+    const factory ${featureName.toClassName}Event.started() = _Started;
+  }
+  ''');
+
+      final stateFile =
+          File('$featuresFolder/presentation/bloc/${featureName}_state.dart');
+      stateFile.createSync();
+      stateFile.writeAsStringSync('''
+  part of '${featureName}_bloc.dart';
+
+  @freezed
+  class ${featureName.toClassName}State with _\$${featureName.toClassName}State {
+    const factory ${featureName.toClassName}State({
+      @Default(false) bool isLoading,
+      String? error,
+    }) = _${featureName.toClassName}State;
+  }
+  ''');
+      break;
+  }
 }
