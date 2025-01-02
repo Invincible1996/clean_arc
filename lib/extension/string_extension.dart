@@ -37,4 +37,35 @@ extension StringExtension on String {
   String get toUrl {
     return split(':')[1].split('/').first;
   }
+
+  /// string is all letter
+  bool get isEnglishOnly {
+    return RegExp(r'^[a-zA-Z]+$').hasMatch(this);
+  }
+
+  //qcServer to qc_server
+  String get toUnderLine {
+    return replaceAllMapped(RegExp(r'[A-Z]'), (match) {
+      return '_${match.group(0)!.toLowerCase()}';
+    });
+  }
+
+  // string not contain letter
+  bool get isNotContainLetter {
+    return !contains(RegExp(r'[a-zA-Z]'));
+  }
+
+  // path name to function name eg: /note/add to noteAdd
+  // String get toMethodName {
+  //   // Split the string by '/' and remove empty elements
+  //   List<String> parts = split('/').where((part) => part.isNotEmpty).toList();
+  //
+  //   // Capitalize the first letter of each part except the first one
+  //   for (int i = 1; i < parts.length; i++) {
+  //     parts[i] = parts[i][0].toUpperCase() + parts[i].substring(1);
+  //   }
+  //
+  //   // Join the parts back together
+  //   return parts.join();
+  // }
 }
