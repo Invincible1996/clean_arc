@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:clean_arc/class_generate.dart';
 import 'package:clean_arc/clean_arc.dart' as clean_arc;
-import 'package:clean_arc/parse_json.dart';
 
 void main(List<String> arguments) {
   var parser = ArgParser();
@@ -23,11 +23,11 @@ void main(List<String> arguments) {
   if (arguments.isEmpty) {
     // show help
     print('''
-    ⚠️ 
+    ⚠️
     Usage: clean_arc <command> [arguments]
     To generate a feature folder: clean_arc feature:<feature_name>
     To generate an api file: clean_arc api:<api_url>
-    ⚠️ 
+    ⚠️
     ''');
     exit(0);
   }
@@ -68,6 +68,7 @@ void main(List<String> arguments) {
       print('⚠️ Please enter the api url. ⚠️');
       exit(0);
     }
-    parseJson(url);
+    // parseJson(url);
+    generateClass(url);
   }
 }
