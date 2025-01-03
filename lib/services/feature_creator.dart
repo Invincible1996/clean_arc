@@ -67,6 +67,13 @@ class FeatureCreator {
 
   Future<void> _createDirectories() async {
     final directories = [
+      // Core Layer
+      'lib/core/network',
+      'lib/core/error',
+      'lib/core/usecases',
+      'lib/core/providers',
+      'lib/core/router',
+
       // Data Layer
       'lib/features/$name/data/datasources',
       'lib/features/$name/data/models',
@@ -76,6 +83,7 @@ class FeatureCreator {
       'lib/features/$name/domain/entities',
       'lib/features/$name/domain/repositories',
       'lib/features/$name/domain/usecases',
+      'lib/features/$name/domain/providers',
 
       // Presentation Layer
       'lib/features/$name/presentation/providers',
@@ -90,26 +98,25 @@ class FeatureCreator {
   }
 
   Future<void> _createFiles() async {
-    // 确保 core 目录存在
+    // Create core directories
     await Directory('lib/core/network').create(recursive: true);
     await Directory('lib/core/error').create(recursive: true);
     await Directory('lib/core/usecases').create(recursive: true);
+    await Directory('lib/core/providers').create(recursive: true);
+    await Directory('lib/core/router').create(recursive: true);
 
-    // 创建核心基础设施文件
+    // Create core infrastructure files
     final coreFiles = {
-      'lib/core/network/network_info.dart': _networkInfoTemplate,
+      'lib/core/network/dio_client.dart': _dioClientTemplate,
+      'lib/core/providers/dio_client_provider.dart': _dioClientProviderTemplate,
       'lib/core/error/failures.dart': _failuresTemplate,
       'lib/core/usecases/usecase.dart': _usecaseBaseTemplate,
     };
 
-    // 创建核心文件（如果不存在）
     for (final entry in coreFiles.entries) {
       final file = File(entry.key);
-      if (!await file.exists()) {
-        await file.create(recursive: true);
-        await file.writeAsString(entry.value);
-        print('📝 Created core file: ${entry.key}');
-      }
+      await file.writeAsString(entry.value);
+      print('📝 Created: ${entry.key}');
     }
 
     final files = {
@@ -139,6 +146,13 @@ class FeatureCreator {
       await file.writeAsString(entry.value);
       print('📝 Created: ${entry.key}');
     }
+
+    // Create domain providers
+    if (useRiverpod) {
+      await File('lib/features/$name/domain/providers/${name}_providers.dart')
+          .writeAsString(_domainProviderTemplate);
+      print('📄 Created: domain providers');
+    }
   }
 
   Future<void> _updateRouter() async {
@@ -152,11 +166,6 @@ class FeatureCreator {
   Future<void> _createRouterFile() async {
     await Directory('lib/core/router').create(recursive: true);
     final routerFile = File('lib/core/router/app_router.dart');
-    
-    // Get the project name from pubspec.yaml
-    final pubspecFile = File('pubspec.yaml');
-    final pubspecContent = await pubspecFile.readAsString();
-    final projectName = RegExp(r'name:\s+(\S+)').firstMatch(pubspecContent)?.group(1) ?? 'app';
 
     await routerFile.writeAsString('''
 import 'package:auto_route/auto_route.dart';
@@ -176,17 +185,20 @@ class AppRouter extends _\$AppRouter {
   Future<void> _addRouteToRouter() async {
     final routerFile = File('lib/core/router/app_router.dart');
     final content = await routerFile.readAsString();
-    
+
     // Get the project name from pubspec.yaml
     final pubspecFile = File('pubspec.yaml');
     final pubspecContent = await pubspecFile.readAsString();
-    final projectName = RegExp(r'name:\s+(\S+)').firstMatch(pubspecContent)?.group(1) ?? 'app';
+    final projectName =
+        RegExp(r'name:\s+(\S+)').firstMatch(pubspecContent)?.group(1) ?? 'app';
 
     // Add import statement
-    final importStatement = "import 'package:$projectName/features/${name.toLowerCase()}/presentation/screens/${name.toLowerCase()}_screen.dart';\n";
-    final insertIndex = content.indexOf("import 'package:auto_route/auto_route.dart';") + 
-        "import 'package:auto_route/auto_route.dart';".length;
-    
+    final importStatement =
+        "import 'package:$projectName/features/${name.toLowerCase()}/presentation/screens/${name.toLowerCase()}_screen.dart';\n";
+    final insertIndex =
+        content.indexOf("import 'package:auto_route/auto_route.dart';") +
+            "import 'package:auto_route/auto_route.dart';".length;
+
     // Add route
     final routesIndex = content.indexOf('routes => [') + 'routes => ['.length;
     final routeToAdd = '''
@@ -199,7 +211,12 @@ class AppRouter extends _\$AppRouter {
     final newContent = content.replaceRange(
       0,
       content.length,
-      content.substring(0, insertIndex) + '\n' + importStatement + content.substring(insertIndex, routesIndex) + routeToAdd + content.substring(routesIndex),
+      content.substring(0, insertIndex) +
+          '\n' +
+          importStatement +
+          content.substring(insertIndex, routesIndex) +
+          routeToAdd +
+          content.substring(routesIndex),
     );
 
     await routerFile.writeAsString(newContent);
@@ -268,7 +285,7 @@ class ${_pascalCase}Model {
 ''';
 
   String get _remoteDataSourceTemplate => '''
-import 'package:dio/dio.dart';
+import '../../../../core/network/dio_client.dart';
 import '../models/${name}_model.dart';
 
 abstract class ${_pascalCase}RemoteDataSource {
@@ -276,9 +293,9 @@ abstract class ${_pascalCase}RemoteDataSource {
 }
 
 class ${_pascalCase}RemoteDataSourceImpl implements ${_pascalCase}RemoteDataSource {
-  final Dio dio;
+  final DioClient dioClient;
 
-  ${_pascalCase}RemoteDataSourceImpl({required this.dio});
+  ${_pascalCase}RemoteDataSourceImpl(this.dioClient);
 
   // Implement your remote data source methods here
 }
@@ -287,19 +304,14 @@ class ${_pascalCase}RemoteDataSourceImpl implements ${_pascalCase}RemoteDataSour
   String get _repositoryImplTemplate => '''
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/network/network_info.dart';
 import '../../domain/entities/${name}_entity.dart';
 import '../../domain/repositories/${name}_repository.dart';
 import '../datasources/${name}_remote_data_source.dart';
 
 class ${_pascalCase}RepositoryImpl implements ${_pascalCase}Repository {
   final ${_pascalCase}RemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
-  ${_pascalCase}RepositoryImpl({
-    required this.remoteDataSource,
-    required this.networkInfo,
-  });
+  ${_pascalCase}RepositoryImpl(this.remoteDataSource);
 
   // Implement your repository methods here
 }
@@ -363,6 +375,28 @@ class ${_pascalCase}Notifier extends StateNotifier<${_pascalCase}State> {
 }
 ''';
   }
+
+  String get _domainProviderTemplate => '''
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/network/dio_client.dart';
+import '../../../../core/providers/dio_client_provider.dart';
+import '../../data/datasources/${name}_remote_data_source.dart';
+import '../../data/repositories/${name}_repository_impl.dart';
+import '../repositories/${name}_repository.dart';
+
+final ${name}DataSourceProvider = Provider.family<${_pascalCase}RemoteDataSource, DioClient>(
+  (_, dioClient) => ${_pascalCase}RemoteDataSourceImpl(dioClient),
+);
+
+final ${name}RepositoryProvider = Provider<${_pascalCase}Repository>(
+  (ref) {
+    final DioClient dioClient = ref.watch(dioClientProvider);
+    final ${_pascalCase}RemoteDataSource dataSource = 
+        ref.watch(${name}DataSourceProvider(dioClient));
+    return ${_pascalCase}RepositoryImpl(dataSource);
+  },
+);
+''';
 
   String get _screenTemplate => '''
 import 'package:flutter/material.dart';
@@ -433,6 +467,41 @@ abstract class UseCase<Type, Params> {
 class NoParams {
   const NoParams();
 }
+''';
+
+  String get _dioClientTemplate => '''
+import 'package:dio/dio.dart';
+
+class DioClient {
+  late final Dio _dio;
+
+  DioClient() {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://api.example.com',
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 3),
+      ),
+    )..interceptors.add(LogInterceptor(
+        request: true,
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: true,
+        responseBody: true,
+      ));
+  }
+
+  // Add your API methods here
+}
+''';
+
+  String get _dioClientProviderTemplate => '''
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../network/dio_client.dart';
+
+final dioClientProvider = Provider<DioClient>(
+  (ref) => DioClient(),
+);
 ''';
 
   String get _pascalCase {

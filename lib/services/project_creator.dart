@@ -18,7 +18,7 @@ class ProjectCreator {
   });
 
   Future<void> create() async {
-    print('🚀 创建 Flutter 项目: $name');
+    print('🚀 Create Flutter Project: $name');
 
     // 1. 创建基础 Flutter 项目
     final result = await Process.run(
@@ -36,7 +36,7 @@ class ProjectCreator {
     );
 
     if (result.exitCode != 0) {
-      print('❌ 创建项目失败: ${result.stderr}');
+      print('❌ Project creation failed: ${result.stderr}');
       return;
     }
 
@@ -56,12 +56,12 @@ class ProjectCreator {
       workingDirectory: name,
     );
 
-    print('✅ 项目创建成功!');
+    print('✅ Project created successfully!');
     _printNextSteps();
   }
 
   Future<void> _createProjectStructure() async {
-    print('📁 创建项目结构...');
+    print('📁 creating project structure...');
     final directories = [
       // Core Layer
       'lib/core/api',
@@ -138,7 +138,8 @@ class ProjectCreator {
   }
 
   Future<void> _addTemplateFiles() async {
-    print('📄 添加模板文件...');
+    // add template files
+    print('📄 adding template files...');
 
     final files = {
       'lib/main.dart': CoreTemplates.mainFile(useRiverpod),
@@ -161,7 +162,7 @@ class ProjectCreator {
   }
 
   void _printNextSteps() {
-    print('\n📝 下一步:');
+    print('\n📝 next step:');
     print('  1. cd $name');
     print('  2. flutter pub get');
     print('  3. dart run build_runner watch --delete-conflicting-outputs');
