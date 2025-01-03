@@ -8,3 +8,6 @@ lib/swagger.json
 
 # Generated files
 struct.dart
+my_app/
+.vscode/
+.idea/
