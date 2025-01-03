@@ -102,8 +102,25 @@ my_project/
 
 ### Create a New Feature Module
 
+Basic usage:
 ```bash
 clean_arc feature --name user
+```
+
+With auto-route support:
+```bash
+clean_arc feature --name user --route
+```
+
+When using the `--route` flag, the tool will:
+1. Add `@RoutePage()` annotation to the screen
+2. Create/update `app_router.dart` if it doesn't exist
+3. Add the route to the router configuration
+4. Add auto_route dependencies to pubspec.yaml
+
+After adding routes, run:
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 This will generate the following structure:

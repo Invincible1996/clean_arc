@@ -5,21 +5,28 @@ class FeatureCommand extends Command {
   @override
   final name = 'feature';
   @override
-  final description = '创建新的功能模块';
+  final description = 'Create a new feature module';
 
   FeatureCommand() {
-    argParser.addOption('name', abbr: 'n', help: '功能模块名称');
+    argParser
+      ..addOption('name', abbr: 'n', help: 'Feature module name')
+      ..addFlag('route', help: 'Add auto route annotation', defaultsTo: false);
   }
 
   @override
   Future<void> run() async {
     final featureName = argResults?['name'] as String?;
     if (featureName == null) {
-      print('请提供功能模块名称');
+      print('Please provide a feature module name');
       return;
     }
 
-    final creator = FeatureCreator(name: featureName);
+    final useRoute = argResults?['route'] as bool;
+
+    final creator = FeatureCreator(
+      name: featureName,
+      useRoute: useRoute,
+    );
     await creator.create();
   }
 }
