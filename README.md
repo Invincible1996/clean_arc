@@ -44,6 +44,37 @@ source ~/.zshrc  # or .bashrc/.bash_profile
 
 ## Usage
 
+### Create a New Flutter Project with Clean Architecture
+
+```bash
+clean_arc create --name my_project --org com.example
+```
+
+This command will:
+1. Create a new Flutter project
+2. Set up Clean Architecture structure
+3. Add necessary dependencies
+4. Configure basic project files
+
+The generated project structure:
+
+```
+my_project/
+├── lib/
+│   ├── core/
+│   │   ├── error/
+│   │   │   └── failures.dart
+│   │   ├── network/
+│   │   │   └── network_info.dart
+│   │   └── usecases/
+│   │       └── usecase.dart
+│   └── features/
+│       └── (your feature modules will go here)
+├── test/
+├── pubspec.yaml
+└── analysis_options.yaml
+```
+
 ### Create a New Feature Module
 
 ```bash
