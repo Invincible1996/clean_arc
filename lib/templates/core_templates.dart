@@ -191,4 +191,36 @@ class NoParams {
   const NoParams();
 }
 ''';
+
+  static String get pubspecTemplate => '''
+name: {{name}}
+description: {{description}}
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  dartz: ^0.10.1
+  dio: ^5.3.3
+  flutter_riverpod: ^2.4.5
+  json_annotation: ^4.8.1
+  internet_connection_checker: ^1.0.0
+  auto_route: ^7.8.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  build_runner: ^2.4.6
+  json_serializable: ^6.7.1
+  auto_route_generator: ^7.3.2
+
+flutter:
+  uses-material-design: true
+''';
 }
