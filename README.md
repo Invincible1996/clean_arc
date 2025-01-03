@@ -20,29 +20,85 @@ Clean Arc is a powerful command-line tool designed to streamline your Flutter de
 
 - Dart SDK >=3.3.1
 - Flutter (for project generation)
-- Mac or Linux operating system
+- Mac, Linux, or Windows operating system
 
-### Quick Install
+### macOS/Linux
 
 ```bash
 dart pub global activate --source git https://github.com/Invincible1996/clean_arc.git
-```
 
-### Environment Setup
-
-Add the following line to your `~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`:
-
-```bash
-export PATH="$PATH":"$HOME/.pub-cache/bin"
-```
-
-Then reload your shell configuration:
-
-```bash
+# Add to PATH (if not already done)
+echo 'export PATH="$PATH":"$HOME/.pub-cache/bin"' >> ~/.zshrc  # or .bashrc/.bash_profile
 source ~/.zshrc  # or .bashrc/.bash_profile
 ```
 
+### Windows
+
+1. Install using dart pub:
+```powershell
+dart pub global activate --source git https://github.com/Invincible1996/clean_arc.git
+```
+
+2. Add to PATH:
+   - Open Windows PowerShell as Administrator
+   - Run the following command to add the pub-cache bin directory to your user PATH:
+```powershell
+$env:PATH += ";$env:LOCALAPPDATA\Pub\Cache\bin"
+[Environment]::SetEnvironmentVariable(
+    "Path",
+    [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User) + ";$env:LOCALAPPDATA\Pub\Cache\bin",
+    [EnvironmentVariableTarget]::User
+)
+```
+   - Close and reopen PowerShell/Command Prompt
+
+Alternatively, you can manually add the PATH:
+1. Press Win + X and select "System"
+2. Click "Advanced system settings"
+3. Click "Environment Variables"
+4. Under "User variables", select "Path" and click "Edit"
+5. Click "New" and add: `%LOCALAPPDATA%\Pub\Cache\bin`
+6. Click "OK" to save
+
+### Verify Installation
+
+After installation, verify that clean_arc is available:
+```bash
+clean_arc --version
+```
+
 ## Usage
+
+### Create a New Flutter Project with Clean Architecture
+
+```bash
+clean_arc create --name my_project --org com.example
+```
+
+This command will:
+1. Create a new Flutter project
+2. Set up Clean Architecture structure
+3. Add necessary dependencies
+4. Configure basic project files
+
+The generated project structure:
+
+```
+my_project/
+├── lib/
+│   ├── core/
+│   │   ├── error/
+│   │   │   └── failures.dart
+│   │   ├── network/
+│   │   │   └── network_info.dart
+│   │   └── usecases/
+│   │       └── usecase.dart
+│   └── features/
+│       └── (your feature modules will go here)
+├── test/
+├── pubspec.yaml
+└── analysis_options.yaml
+```
 
 ### Create a New Feature Module
 
