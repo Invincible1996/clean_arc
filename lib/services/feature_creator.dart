@@ -1,6 +1,12 @@
 // lib/services/feature_creator.dart
 
 import 'dart:io';
+import '../templates/feature_templates.dart';
+
+String _pascalCase(String text) {
+  if (text.isEmpty) return '';
+  return text[0].toUpperCase() + text.substring(1);
+}
 
 class FeatureCreator {
   final String name;
@@ -67,13 +73,6 @@ class FeatureCreator {
 
   Future<void> _createDirectories() async {
     final directories = [
-      // Core Layer
-      'lib/core/network',
-      'lib/core/error',
-      'lib/core/usecases',
-      'lib/core/providers',
-      'lib/core/router',
-
       // Data Layer
       'lib/features/$name/data/datasources',
       'lib/features/$name/data/models',
@@ -98,46 +97,28 @@ class FeatureCreator {
   }
 
   Future<void> _createFiles() async {
-    // Create core directories
-    await Directory('lib/core/network').create(recursive: true);
-    await Directory('lib/core/error').create(recursive: true);
-    await Directory('lib/core/usecases').create(recursive: true);
-    await Directory('lib/core/providers').create(recursive: true);
-    await Directory('lib/core/router').create(recursive: true);
-
-    // Create core infrastructure files
-    final coreFiles = {
-      'lib/core/network/dio_client.dart': _dioClientTemplate,
-      'lib/core/providers/dio_client_provider.dart': _dioClientProviderTemplate,
-      'lib/core/error/failures.dart': _failuresTemplate,
-      'lib/core/usecases/usecase.dart': _usecaseBaseTemplate,
-    };
-
-    for (final entry in coreFiles.entries) {
-      final file = File(entry.key);
-      await file.writeAsString(entry.value);
-      print('📝 Created: ${entry.key}');
-    }
-
     final files = {
       // Domain Layer
-      'lib/features/$name/domain/entities/${name}_entity.dart': _entityTemplate,
+      'lib/features/$name/domain/entities/${name}_entity.dart':
+          FeatureTemplates.entity(name),
       'lib/features/$name/domain/repositories/${name}_repository.dart':
-          _repositoryTemplate,
-      'lib/features/$name/domain/usecases/get_${name}.dart': _usecaseTemplate,
+          FeatureTemplates.repository(name),
+      'lib/features/$name/domain/usecases/get_${name}.dart':
+          FeatureTemplates.usecase(name),
 
       // Data Layer
-      'lib/features/$name/data/models/${name}_model.dart': _modelTemplate,
+      'lib/features/$name/data/models/${name}_model.dart':
+          FeatureTemplates.model(name),
       'lib/features/$name/data/datasources/${name}_remote_data_source.dart':
-          _remoteDataSourceTemplate,
+          FeatureTemplates.remoteDataSource(name),
       'lib/features/$name/data/repositories/${name}_repository_impl.dart':
-          _repositoryImplTemplate,
+          FeatureTemplates.repositoryImpl(name),
 
       // Presentation Layer
       'lib/features/$name/presentation/providers/${name}_provider.dart':
-          _providerTemplate,
+          FeatureTemplates.provider(name, useRiverpod),
       'lib/features/$name/presentation/screens/${name}_screen.dart':
-          _screenTemplate,
+          FeatureTemplates.screen(name, useRiverpod: useRiverpod, useRoute: useRoute),
     };
 
     for (final entry in files.entries) {
@@ -150,7 +131,7 @@ class FeatureCreator {
     // Create domain providers
     if (useRiverpod) {
       await File('lib/features/$name/domain/providers/${name}_providers.dart')
-          .writeAsString(_domainProviderTemplate);
+          .writeAsString(FeatureTemplates.domainProvider(name));
       print('📄 Created: domain providers');
     }
   }
@@ -205,7 +186,7 @@ class AppRouter extends _\$AppRouter {
 
         AutoRoute(
           path: '/${name.toLowerCase()}',
-          page: ${_pascalCase}Route.page,
+          page: ${_pascalCase(name)}Route.page,
         ),''';
 
     final newContent = content.replaceRange(
@@ -220,296 +201,6 @@ class AppRouter extends _\$AppRouter {
     );
 
     await routerFile.writeAsString(newContent);
-  }
-
-  String get _entityTemplate => '''
-class ${_pascalCase}Entity {
-  // TODO: Define your entity properties here
-  
-  const ${_pascalCase}Entity();
-}
-''';
-
-  String get _repositoryTemplate => '''
-abstract class ${_pascalCase}Repository {
-  // TODO: Define your repository methods here
-}
-''';
-
-  String get _usecaseTemplate => '''
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../entities/${name}_entity.dart';
-import '../repositories/${name}_repository.dart';
-
-class Get${_pascalCase} implements UseCase<${_pascalCase}Entity, NoParams> {
-  final ${_pascalCase}Repository repository;
-
-  Get${_pascalCase}(this.repository);
-
-  @override
-  Future<Either<Failure, ${_pascalCase}Entity>> call(NoParams params) async {
-    // Implement the use case logic here
-    throw UnimplementedError();
-  }
-}
-''';
-
-  String get _modelTemplate => '''
-import 'package:json_annotation/json_annotation.dart';
-import '../../domain/entities/${name}_entity.dart';
-
-part '${name}_model.g.dart';
-
-@JsonSerializable()
-class ${_pascalCase}Model {
-  // TODO: Define your model properties here
-  
-  const ${_pascalCase}Model();
-
-  factory ${_pascalCase}Model.fromJson(Map<String, dynamic> json) => 
-      _\$${_pascalCase}ModelFromJson(json);
-
-  Map<String, dynamic> toJson() => _\$${_pascalCase}ModelToJson(this);
-
-  ${_pascalCase}Entity toEntity() {
-    // Implement conversion to entity
-    throw UnimplementedError();
-  }
-
-  static List<${_pascalCase}Entity> toEntityList(List<${_pascalCase}Model> models) {
-    return models.map((model) => model.toEntity()).toList();
-  }
-}
-''';
-
-  String get _remoteDataSourceTemplate => '''
-import '../../../../core/network/dio_client.dart';
-import '../models/${name}_model.dart';
-
-abstract class ${_pascalCase}RemoteDataSource {
-  // Define your remote data source methods here
-}
-
-class ${_pascalCase}RemoteDataSourceImpl implements ${_pascalCase}RemoteDataSource {
-  final DioClient dioClient;
-
-  ${_pascalCase}RemoteDataSourceImpl(this.dioClient);
-
-  // Implement your remote data source methods here
-}
-''';
-
-  String get _repositoryImplTemplate => '''
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/${name}_entity.dart';
-import '../../domain/repositories/${name}_repository.dart';
-import '../datasources/${name}_remote_data_source.dart';
-
-class ${_pascalCase}RepositoryImpl implements ${_pascalCase}Repository {
-  final ${_pascalCase}RemoteDataSource remoteDataSource;
-
-  ${_pascalCase}RepositoryImpl(this.remoteDataSource);
-
-  // Implement your repository methods here
-}
-''';
-
-  String get _providerTemplate {
-    if (!useRiverpod) return '';
-    return '''
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/${name}_entity.dart';
-
-// State
-class ${_pascalCase}State {
-  final bool isLoading;
-  final List<${_pascalCase}Entity> items;
-  final String? error;
-
-  const ${_pascalCase}State({
-    this.isLoading = false,
-    this.items = const [],
-    this.error,
-  });
-
-  ${_pascalCase}State copyWith({
-    bool? isLoading,
-    List<${_pascalCase}Entity>? items,
-    String? error,
-  }) {
-    return ${_pascalCase}State(
-      isLoading: isLoading ?? this.isLoading,
-      items: items ?? this.items,
-      error: error ?? this.error,
-    );
-  }
-}
-
-// Provider
-final ${_camelCase}Provider = StateNotifierProvider<${_pascalCase}Notifier, ${_pascalCase}State>(
-  (ref) => ${_pascalCase}Notifier(),
-);
-
-// Notifier
-class ${_pascalCase}Notifier extends StateNotifier<${_pascalCase}State> {
-  ${_pascalCase}Notifier() : super(const ${_pascalCase}State());
-
-  Future<void> loadItems() async {
-    state = state.copyWith(isLoading: true);
-    try {
-      // Implement data loading
-      state = state.copyWith(
-        isLoading: false,
-        items: [],
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
-    }
-  }
-}
-''';
-  }
-
-  String get _domainProviderTemplate => '''
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/network/dio_client.dart';
-import '../../../../core/providers/dio_client_provider.dart';
-import '../../data/datasources/${name}_remote_data_source.dart';
-import '../../data/repositories/${name}_repository_impl.dart';
-import '../repositories/${name}_repository.dart';
-
-final ${name}DataSourceProvider = Provider.family<${_pascalCase}RemoteDataSource, DioClient>(
-  (_, dioClient) => ${_pascalCase}RemoteDataSourceImpl(dioClient),
-);
-
-final ${name}RepositoryProvider = Provider<${_pascalCase}Repository>(
-  (ref) {
-    final DioClient dioClient = ref.watch(dioClientProvider);
-    final ${_pascalCase}RemoteDataSource dataSource = 
-        ref.watch(${name}DataSourceProvider(dioClient));
-    return ${_pascalCase}RepositoryImpl(dataSource);
-  },
-);
-''';
-
-  String get _screenTemplate => '''
-import 'package:flutter/material.dart';
-${useRiverpod ? "import 'package:flutter_riverpod/flutter_riverpod.dart';" : ""}
-${useRoute ? "import 'package:auto_route/auto_route.dart';" : ""}
-
-${useRoute ? "@RoutePage()" : ""}
-class ${_pascalCase}Screen extends ${useRiverpod ? 'ConsumerWidget' : 'StatelessWidget'} {
-  const ${_pascalCase}Screen({super.key});
-
-  @override
-  Widget build(BuildContext context${useRiverpod ? ', WidgetRef ref' : ''}) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('${_pascalCase}'),
-      ),
-      body: const Center(
-        child: Text('${_pascalCase} Screen'),
-      ),
-    );
-  }
-}
-''';
-
-  String get _networkInfoTemplate => '''
-import 'package:internet_connection_checker/internet_connection_checker.dart';
-
-abstract class NetworkInfo {
-  Future<bool> get isConnected;
-}
-
-class NetworkInfoImpl implements NetworkInfo {
-  final InternetConnectionChecker connectionChecker;
-
-  NetworkInfoImpl(this.connectionChecker);
-
-  @override
-  Future<bool> get isConnected => connectionChecker.hasConnection;
-}
-''';
-
-  String get _failuresTemplate => '''
-abstract class Failure {
-  const Failure();
-}
-
-class ServerFailure extends Failure {
-  const ServerFailure();
-}
-
-class NetworkFailure extends Failure {
-  const NetworkFailure();
-}
-
-class CacheFailure extends Failure {
-  const CacheFailure();
-}
-''';
-
-  String get _usecaseBaseTemplate => '''
-import 'package:dartz/dartz.dart';
-import '../error/failures.dart';
-
-abstract class UseCase<Type, Params> {
-  Future<Either<Failure, Type>> call(Params params);
-}
-
-class NoParams {
-  const NoParams();
-}
-''';
-
-  String get _dioClientTemplate => '''
-import 'package:dio/dio.dart';
-
-class DioClient {
-  late final Dio _dio;
-
-  DioClient() {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: 'https://api.example.com',
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 3),
-      ),
-    )..interceptors.add(LogInterceptor(
-        request: true,
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: true,
-        responseBody: true,
-      ));
-  }
-
-  // Add your API methods here
-}
-''';
-
-  String get _dioClientProviderTemplate => '''
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../network/dio_client.dart';
-
-final dioClientProvider = Provider<DioClient>(
-  (ref) => DioClient(),
-);
-''';
-
-  String get _pascalCase {
-    return name[0].toUpperCase() + name.substring(1);
-  }
-
-  String get _camelCase {
-    return name[0].toLowerCase() + name.substring(1);
   }
 
   void _printNextSteps() {
